@@ -23,7 +23,7 @@ SELECT * FROM feeds WHERE user_id = $1;
 -- name: GetFeedsByName :many
 SELECT * FROM feeds WHERE name = $1;
 
--- name: GetFeedsByURL :many
+-- name: ListFeedsByURL :many
 SELECT * FROM feeds WHERE url = $1;
 
 -- name: DeleteFeeds :exec

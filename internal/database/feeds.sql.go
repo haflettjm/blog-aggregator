@@ -92,41 +92,6 @@ func (q *Queries) GetFeedsByName(ctx context.Context, name string) ([]Feed, erro
 	return items, nil
 }
 
-const getFeedsByURL = `-- name: GetFeedsByURL :many
-SELECT id, url, name, description, created_at, last_updated, user_id FROM feeds WHERE url = $1
-`
-
-func (q *Queries) GetFeedsByURL(ctx context.Context, url string) ([]Feed, error) {
-	rows, err := q.db.QueryContext(ctx, getFeedsByURL, url)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	var items []Feed
-	for rows.Next() {
-		var i Feed
-		if err := rows.Scan(
-			&i.ID,
-			&i.Url,
-			&i.Name,
-			&i.Description,
-			&i.CreatedAt,
-			&i.LastUpdated,
-			&i.UserID,
-		); err != nil {
-			return nil, err
-		}
-		items = append(items, i)
-	}
-	if err := rows.Close(); err != nil {
-		return nil, err
-	}
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-	return items, nil
-}
-
 const getFeedsByUserId = `-- name: GetFeedsByUserId :many
 SELECT id, url, name, description, created_at, last_updated, user_id FROM feeds WHERE user_id = $1
 `
@@ -168,6 +133,41 @@ SELECT id, url, name, description, created_at, last_updated, user_id FROM feeds 
 
 func (q *Queries) ListFeeds(ctx context.Context, id int32) ([]Feed, error) {
 	rows, err := q.db.QueryContext(ctx, listFeeds, id)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Feed
+	for rows.Next() {
+		var i Feed
+		if err := rows.Scan(
+			&i.ID,
+			&i.Url,
+			&i.Name,
+			&i.Description,
+			&i.CreatedAt,
+			&i.LastUpdated,
+			&i.UserID,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const listFeedsByURL = `-- name: ListFeedsByURL :many
+SELECT id, url, name, description, created_at, last_updated, user_id FROM feeds WHERE url = $1
+`
+
+func (q *Queries) ListFeedsByURL(ctx context.Context, url string) ([]Feed, error) {
+	rows, err := q.db.QueryContext(ctx, listFeedsByURL, url)
 	if err != nil {
 		return nil, err
 	}
