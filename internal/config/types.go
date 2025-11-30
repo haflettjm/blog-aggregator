@@ -30,4 +30,28 @@ func (c *Config) Read(filepath string) {
 
 func (c *Config) SetUser(user string) {
 	c.CURR_UNAME = user
+	if err := c.Write(".gatorconfig.json"); err != nil {
+		log.Fatalf("Error writing config: \n %v", err)
+	}
+}
+
+func (c *Config) Write(filepath string) error {
+	if filepath == "" {
+		filepath = ".gatorconfig.json"
+	}
+
+	home, _ := os.UserHomeDir()
+	path := home + "/" + filepath
+
+	file, err := json.MarshalIndent(c, "", "  ")
+	if err != nil {
+		return err
+	}
+
+	err = os.WriteFile(path, file, 0644)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
