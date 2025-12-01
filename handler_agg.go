@@ -1,11 +1,12 @@
 package main
 
 import (
+	"blog-aggregator/internal/database"
 	"context"
 	"fmt"
 )
 
-func handlerAgg(state *state, cmd command) error {
+func handlerAgg(state *state, cmd command, user database.User) error {
 	feeds := []string{}
 	if len(cmd.args) == 0 {
 		feeds = []string{

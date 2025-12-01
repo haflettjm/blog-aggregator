@@ -1,3 +1,15 @@
+package main
+
+import (
+	"blog-aggregator/internal/database"
+	"context"
+	"errors"
+	"fmt"
+	"time"
+
+	"github.com/google/uuid"
+)
+
 func handlerLogin(state *state, cmd command) error {
 	if len(cmd.args) < 1 || cmd.args[0] == "" {
 		return errors.New("invalid arguments")
@@ -36,7 +48,7 @@ func handlerRegister(state *state, cmd command) error {
 	return nil
 }
 
-func handlerListUsers(state *state, cmd command) error {
+func handlerListUsers(state *state, cmd command, user database.User) error {
 	users, err := state.db.GetUsers(context.Background())
 	if err != nil {
 		return err

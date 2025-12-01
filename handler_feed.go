@@ -58,14 +58,17 @@ func addFeed(ctx context.Context, state *state, url string, name string) error {
 	if err != nil {
 		return err
 	}
-
+	err = follow(state, url)
+	if err != nil {
+		return err
+	}
 	// fmt.Printf("Feed added: %s (%s)\n", url, user)
 
 	fmt.Println(state.db.GetFeedsByUserId(ctx, dbUser.ID))
 	return nil
 }
 
-func handlerAddFeed(state *state, cmd command) error {
+func handlerAddFeed(state *state, cmd command, user database.User) error {
 	if len(cmd.args) != 2 {
 		return errors.New("Usage: addfeed <url> <name>")
 	}
@@ -83,14 +86,14 @@ func handlerAddFeed(state *state, cmd command) error {
 	return nil
 }
 
-func handlerResetFeeds(state *state, cmd command) error {
-	if err := resetFeeds(context.Background(), state); err != nil {
+func handlerResetFeeds(state *state, cmd command, user database.User) error {
+	if err := resetFeeds(context.Background(), state, user); err != nil {
 		return err
 	}
 	return nil
 }
 
-func handlerListFeeds(state *state, cmd command) error {
+func handlerListFeeds(state *state, cmd command, user database.User) error {
 	if err := listFeeds(context.Background(), state); err != nil {
 		return err
 	}
@@ -112,6 +115,45 @@ func listFeeds(ctx context.Context, state *state) error {
 			fmt.Println("URL: ", feed.Url)
 			fmt.Println("Added By: ", user.Name)
 		}
+	}
+	return nil
+}
+func unfollowFeed(ctx context.Context, state *state, url string) error {
+	user, err := state.db.GetUser(ctx, state.cfg.CURR_UNAME)
+	if err != nil {
+		return err
+	}
+
+	user_id := user.ID
+
+	feeds, err := state.db.ListFeedsByURL(ctx, url)
+	if err != nil {
+		return err
+	}
+
+	for _, feed := range feeds {
+		dbParams := database.UnfollowFeedParams{
+			UserID: user_id,
+			FeedID: feed.ID,
+		}
+		err := state.db.UnfollowFeed(ctx, dbParams)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+
+}
+
+func handlerUnfollow(state *state, cmd command, user database.User) error {
+	ctx := context.Background()
+	if len(cmd.args) != 1 {
+		return errors.New("Usage: unfollowfeed <url>")
+	}
+
+	url := cmd.args[0]
+	if err := unfollowFeed(ctx, state, url); err != nil {
+		return err
 	}
 	return nil
 }
